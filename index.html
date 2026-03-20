@@ -119,8 +119,6 @@
             opacity: 0;
             pointer-events: none;
         }
-
-        /* Glitch effect for Game Over */
         .error-text {
             color: #ff3333;
             text-shadow: 2px 2px 0px #550000, 0 0 20px #ff0000;
@@ -186,10 +184,7 @@
     const restartBtn = document.getElementById('restartBtn');
     const pauseScreen = document.getElementById('pauseScreen');
     const resumeBtn = document.getElementById('resumeBtn');
-
-    const HIGH_SCORE_KEY = 'voidRunnerHighScore';
-
-    // Game State
+    const HIGH_SCORE_KEY = 'voidRunnerHighScore';e
     let isPlaying = false;
     let isPaused = false;
     let isBoosting = false;
@@ -198,12 +193,8 @@
     let gameSpeed = 5;
     let warpPercentage = 100;
     let width, height, cx, cy;
-
-    // 3D Settings
     const FOV = 600;
     const LANE_WIDTH_3D = 600;
-
-    // Resize handling
     function resize() {
         width = canvas.width = window.innerWidth;
         height = canvas.height = window.innerHeight;
@@ -223,16 +214,14 @@
         highScoreStartDisplay.innerText = `High Score: ${highScore}`;
         highScoreEndDisplay.innerText = `High Score: ${highScore}`;
     }
-
-    // Entities
     const player = {
-        lane: 1, // 0, 1, 2
-        x: 0, // 3D world X
-        y: 200, // 3D world Y (on the "floor")
-        z: 100, // Distance from camera
+        lane: 1,
+        x: 0, 
+        y: 200, 
+        z: 100,
         width: 80,
         height: 40,
-        roll: 0, // For lane-switch animation
+        roll: 0, 
         shielded: false
     };
 
@@ -242,15 +231,14 @@
     let powerups = [];
     let particles = [];
 
-    // Input
     window.addEventListener('keydown', (e) => {
         if (!isPlaying) return;
         if (e.key === 'ArrowLeft' && player.lane > 0) {
             player.lane--;
-            player.roll = -0.45; // Radians for roll
+            player.roll = -0.45; 
         } else if (e.key === 'ArrowRight' && player.lane < 2) {
             player.lane++;
-            player.roll = 0.45; // Radians for roll
+            player.roll = 0.45; 
         } else if (e.key === 'ArrowUp') {
             isBoosting = true;
         } else if (e.key === 'Escape' && isPlaying) {
@@ -278,16 +266,16 @@
 
     function spawnAsteroid() {
         const lane = Math.floor(Math.random() * 3);
-        const isDiagonal = Math.random() < 0.25; // 25% chance of being diagonal
+        const isDiagonal = Math.random() < 0.25;
 
         if (isDiagonal) {
             asteroids.push({
                 type: 'diagonal',
-                lane: lane, // for starting position
+                lane: lane,
                 x: (lane - 1) * LANE_WIDTH_3D,
                 y: 200,
                 z: 5000,
-                size: 120 + Math.random() * 40, // slightly smaller but faster
+                size: 120 + Math.random() * 40,
                 rotation: Math.random() * Math.PI * 2,
                 rotSpeed: (Math.random() - 0.5) * 0.2,
                 velocityX: (Math.random() > 0.5 ? 1 : -1) * 15
@@ -341,29 +329,18 @@
 
     function update() {
         if (!isPlaying || isPaused) return;
-
-        // Difficulty scaling
         let baseSpeed = 40 + (score / 100);
         gameSpeed = isBoosting ? baseSpeed * 2 : baseSpeed;
         warpPercentage = Math.min(999, Math.floor((100 + (score / 10)) * (isBoosting ? 2 : 1)));
-
-        // Smooth Player Movement & Roll
         const targetX = (player.lane - 1) * LANE_WIDTH_3D;
         player.x += (targetX - player.x) * 0.15;
-        
-        // Damping Logic
         player.roll *= 0.8;
-
-        // Rotation Limits
         if (player.roll > 0.45) player.roll = 0.45;
         if (player.roll < -0.45) player.roll = -0.45;
-
-        // Lane-Switch Snap
         if (Math.abs(targetX - player.x) < 1) {
             player.roll = 0;
         }
 
-        // Stars
         stars.forEach(star => {
             star.z -= gameSpeed;
             if (star.z <= 0) {
@@ -373,8 +350,8 @@
             }
         });
 
-        // Spawn Particles from engine
-        if (particles.length < 150) { // Limit total particles
+       
+        if (particles.length < 150) { 
             for (let i = 0; i < 3; i++) {
                 const p = {
                     x: player.x + (Math.random() - 0.5) * 10,
@@ -387,19 +364,15 @@
                 particles.push(p);
             }
         }
-
-        // Update Particles
         for (let i = particles.length - 1; i >= 0; i--) {
             let p = particles[i];
-            p.z -= gameSpeed; // Move with the world
+            p.z -= gameSpeed; 
             p.lifespan--;
             if (p.lifespan <= 0) {
                 particles.splice(i, 1);
             }
         }
-
-        // Shield Powerups
-        if (Math.random() < 0.005 && powerups.length === 0) { // Very rare, only one at a time
+        if (Math.random() < 0.005 && powerups.length === 0) { 
             spawnShield();
         }
 
@@ -407,7 +380,6 @@
             let p = powerups[i];
             p.z -= gameSpeed;
 
-            // Collection Detection
             if (p.z < player.z + 50 && p.z > player.z - 50) {
                 if (p.lane === player.lane) {
                     player.shielded = true;
@@ -421,9 +393,9 @@
             }
         }
 
-        // Orbs
-        if (Math.random() < 0.01) { // Spawn orbs less frequently
-            if (orbs.length < 3) { // Limit number of orbs on screen
+        
+        if (Math.random() < 0.01) { 
+            if (orbs.length < 3) { 
                 spawnOrb();
             }
         }
@@ -431,13 +403,11 @@
         for (let i = orbs.length - 1; i >= 0; i--) {
             let o = orbs[i];
             o.z -= gameSpeed;
-
-            // Collection Detection
             if (o.z < player.z + 50 && o.z > player.z - 50) {
                 if (o.lane === player.lane) {
-                    score += isBoosting ? 500 : 250; // Orbs are worth more
+                    score += isBoosting ? 500 : 250;
                     orbs.splice(i, 1);
-                    continue; // Skip to next orb
+                    continue;
                 }
             }
             
@@ -446,9 +416,8 @@
             }
         }
 
-        // Asteroids
+       
         if (Math.random() < 0.03 + (score / 100000)) {
-            // Prevent overlapping spawns too close
             if (asteroids.length === 0 || asteroids[asteroids.length - 1].z < 4000) {
                 spawnAsteroid();
             }
@@ -458,8 +427,6 @@
             let a = asteroids[i];
             a.z -= gameSpeed;
             a.rotation += a.rotSpeed;
-    
-            // Handle diagonal movement
             if (a.type === 'diagonal') {
                 a.x += a.velocityX;
                 const wallBoundary = LANE_WIDTH_3D * 1.5;
@@ -467,16 +434,14 @@
                     a.velocityX *= -1;
                 }
             }
-    
-            // Collision Detection
             if (a.z < player.z + 100 && a.z > player.z - 100) {
                 let collision = false;
                 if (a.type === 'diagonal') {
-                    // Check X-axis proximity for diagonal asteroids
+                   
                     if (Math.abs(a.x - player.x) < LANE_WIDTH_3D / 2) {
                         collision = true;
                     }
-                } else { // For normal asteroids
+                } else { 
                     if (a.lane === player.lane) {
                         collision = true;
                     }
@@ -484,8 +449,8 @@
     
                 if (collision) {
                     if (player.shielded) {
-                        player.shielded = false; // Shield is used up
-                        asteroids.splice(i, 1); // Destroy the asteroid
+                        player.shielded = false; 
+                        asteroids.splice(i, 1);
                     } else {
                         gameOver();
                     }
@@ -496,18 +461,16 @@
                 score += isBoosting ? 200 : 100;
             }
         }
-
-        // UI
         scoreDisplay.innerText = `SCORE: ${score}`;
         speedDisplay.innerText = `WARP: ${warpPercentage}%`;
     }
 
     function draw() {
-        // Clear
+       
         ctx.fillStyle = '#050510';
         ctx.fillRect(0, 0, width, height);
 
-        // Draw Stars
+       
         ctx.fillStyle = '#ffffff';
         stars.forEach(star => {
             const p = project(star.x, star.y, star.z);
@@ -518,8 +481,6 @@
             ctx.fill();
         });
         ctx.globalAlpha = 1.0;
-
-        // Draw Lanes
         ctx.strokeStyle = 'rgba(0, 242, 255, 0.3)';
         ctx.lineWidth = 2;
         
@@ -534,7 +495,7 @@
             ctx.stroke();
         });
 
-        // Draw Shield Powerups
+       
         powerups.forEach(p => {
             if (p.z < 0) return;
             const proj = project(p.x, p.y, p.z);
@@ -542,8 +503,6 @@
 
             ctx.save();
             ctx.translate(proj.x, proj.y);
-            
-            // Draw a hexagon for the shield
             ctx.strokeStyle = '#00f2ff';
             ctx.fillStyle = 'rgba(0, 242, 255, 0.2)';
             ctx.lineWidth = 3 * proj.scale;
@@ -564,7 +523,7 @@
             ctx.restore();
         });
 
-        // Draw Particles
+ 
         ctx.globalCompositeOperation = 'lighter';
         particles.forEach(p => {
             if (p.z < 0) return;
@@ -582,8 +541,8 @@
         ctx.globalCompositeOperation = 'source-over';
 
 
-        // Draw Orbs
-        ctx.globalCompositeOperation = 'lighter'; // Additive blending for glow
+
+        ctx.globalCompositeOperation = 'lighter';
         orbs.forEach(o => {
             if (o.z < 0) return;
             const proj = project(o.x, o.y, o.z);
@@ -599,9 +558,7 @@
             ctx.arc(proj.x, proj.y, size, 0, Math.PI * 2);
             ctx.fill();
         });
-        ctx.globalCompositeOperation = 'source-over'; // Reset blending mode
-
-        // Draw Player
+        ctx.globalCompositeOperation = 'source-over';
         const pp = project(player.x, player.y, player.z);
         const pScale = pp.scale;
         const pW = player.width * pScale;
@@ -610,8 +567,6 @@
         ctx.save();
         ctx.translate(pp.x, pp.y);
         ctx.rotate(player.roll);
-
-        // Draw shield effect around player if active
         if (player.shielded) {
             ctx.globalCompositeOperation = 'lighter';
             const shieldRadius = (player.width / 2 + 20) * pScale;
@@ -630,38 +585,30 @@
             ctx.stroke();
             ctx.globalCompositeOperation = 'source-over';
         }
-
-        // Engine Trail
         ctx.fillStyle = '#00f2ff';
         ctx.beginPath();
         ctx.moveTo(-15 * pScale, 0);
         ctx.lineTo(0, (80 + Math.random() * 20) * pScale);
         ctx.lineTo(15 * pScale, 0);
         ctx.fill();
-
-        // Ship Body (3D Pyramid)
-        // Left Face
         ctx.fillStyle = '#dddddd';
         ctx.beginPath();
-        ctx.moveTo(0, -pH); // Nose
-        ctx.lineTo(-pW/2, 0); // Left Wing
-        ctx.lineTo(0, -pH/2); // Top (raised)
+        ctx.moveTo(0, -pH); 
+        ctx.lineTo(-pW/2, 0); 
+        ctx.lineTo(0, -pH/2); 
         ctx.closePath();
         ctx.fill();
 
-        // Right Face
         ctx.fillStyle = '#ffffff';
         ctx.beginPath();
-        ctx.moveTo(0, -pH); // Nose
-        ctx.lineTo(pW/2, 0); // Right Wing
-        ctx.lineTo(0, -pH/2); // Top
+        ctx.moveTo(0, -pH); 
+        ctx.lineTo(pW/2, 0); 
+        ctx.lineTo(0, -pH/2);
         ctx.closePath();
         ctx.fill();
 
-        ctx.restore(); // Restore from player rotation
-
-        // Draw Asteroids
-        asteroids.sort((a, b) => b.z - a.z); // Draw far to near
+        ctx.restore();
+        asteroids.sort((a, b) => b.z - a.z); 
         asteroids.forEach(a => {
             if (a.z < 0) return;
             const proj = project(a.x, a.y, a.z);
@@ -669,11 +616,7 @@
             ctx.save();
             ctx.translate(proj.x, proj.y);
             ctx.rotate(a.rotation);
-            
-            // 3D Asteroid (Extrusion)
             const r = (a.size / 2) * scale;
-            
-            // Shadow/Side
             ctx.fillStyle = '#333344';
             ctx.beginPath();
             for(let i=0; i<=7; i++) {
@@ -687,8 +630,6 @@
             }
             ctx.closePath();
             ctx.fill();
-
-            // Top Face
             ctx.fillStyle = '#666677';
             ctx.strokeStyle = '#888899';
             ctx.lineWidth = 3;
@@ -754,30 +695,23 @@
 
         window.addEventListener('touchstart', (e) => {
             if (!isPlaying || isPaused) return;
-
-            // Prevent default browser actions like scrolling or zooming
             e.preventDefault();
 
             const touchX = e.touches[0].clientX;
 
             if (touchX < window.innerWidth / 2) {
-                // Left side tap
                 if (player.lane > 0) {
                     player.lane--;
                     player.roll = -0.45;
                 }
             } else {
-                // Right side tap
                 if (player.lane < 2) {
                     player.lane++;
                     player.roll = 0.45;
                 }
             }
         }, { passive: false });
-
-        // Initial setup
         resize();
-        // Start loop immediately for background effect
         updateHighScoreDisplay();
         initStars();
         loop();
